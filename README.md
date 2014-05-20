@@ -11,7 +11,7 @@ Controller keyboard currently relies on:
 * Python 2.7
 * PyGame
 * PyMouse
-* PyWin32 (and therefore Windows)
+* AutoPy
 
 Install the above, connect your controller, and run controllerkeyboard.py in Python.
 

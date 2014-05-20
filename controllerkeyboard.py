@@ -1,5 +1,5 @@
 from pymouse import PyMouse
-import win32com.client
+import autopy
 import pygame
 import math
 
@@ -7,7 +7,7 @@ import math
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 THRESH = .5
-SENSITIVITY = 20
+SENSITIVITY = 50
 DEADZONE = .2
 
 
@@ -101,15 +101,18 @@ done = False
 clock = pygame.time.Clock()
 
 #Initialize the mouse
+m1 = autopy.mouse
+loc = [m1.get_pos()[0],m1.get_pos()[1]]
 m = PyMouse()
-loc = [m.screen_size()[0] / 2, m.screen_size()[1] / 2]
 m.move(loc[0], loc[1])
+
+#Initialize the keyboard
+key = autopy.key
 
 
 testphrase = ""
 
-#Initialize the keyboard
-shell = win32com.client.Dispatch("WScript.Shell")
+
 
 # Initialize the joysticks
 joystick = None
@@ -156,37 +159,40 @@ while done == False:
                 #ABXY - enter char
                     outchar = typewriter.get_letters(joystick.get_axis(0), joystick.get_axis(1), joystick.get_axis(2))[
                         3 - i]
-                    shell.SendKeys(outchar)
+                    key.tap(outchar)
             if joystick.get_button(4) == 1 and debounce == 0: #LBump - backspace
                 debounce = 3
-                shell.SendKeys("{BACKSPACE}")
+                key.tap(key.K_BACKSPACE)
             if joystick.get_button(5) == 1 and debounce == 0: #RBump - space
                 debounce = 3
-                shell.SendKeys(' ')
+                key.tap(' ')
             if joystick.get_button(6) == 1: #Start - unmapped
                 pass
             if joystick.get_button(7) == 1: #Select - unmapped
                 pass
             if joystick.get_button(8) == 1: #Lstick - enter
-                shell.SendKeys('{ENTER}')
+                key.tap(key.K_RETURN)
             if joystick.get_button(9) == 1 and debounce == 0: #Rstick - click (LTrigger = right-click, RTrigger = Middle-click)
                 debounce = 10
-                button = 1
+                #button = 1
+                button = m1.LEFT_BUTTON
                 if joystick.get_axis(2) > DEADZONE:
-                    button = 2
+                    #button = 2
+                    button = m1.RIGHT_BUTTON
                 if joystick.get_axis(2) < -DEADZONE:
-                    button = 3
-                m.click(int(loc[0]), int(loc[1]), button)
+                    #button = 3
+                    button = m1.CENTER_BUTTON
+                m1.click(button)
     if joystick != None and joystick.get_hat(0) != (0, 0) and hdebounce == 0:
         hdebounce = 5
         if joystick.get_hat(0)[1] == 1:
-            shell.SendKeys('{UP}')
+            key.tap(key.K_UP)
         if joystick.get_hat(0)[1] == -1:
-            shell.SendKeys('{DOWN}')
+            key.tap(key.K_DOWN)
         if joystick.get_hat(0)[0] == -1:
-            shell.SendKeys('{LEFT}')
+            key.tap(key.K_LEFT)
         if joystick.get_hat(0)[0] == 1:
-            shell.SendKeys('{RIGHT}')
+            key.tap(key.K_RIGHT)
     #DRAWING STEP
     screen.fill(WHITE)
     textPrint.reset()
