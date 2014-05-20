@@ -7,9 +7,8 @@ These should be included in the GitHub issue tracker ASAP.
 General Release
 ---------------
 
-* Modular module-ized code - controllerkeyboard.py should only be a wrapper
+* Clean up code - like seriously WTF
 * Support adding new controller configurations
-* Replace PyMouse + PyWin32 with Autopy https://github.com/msanders/autopy/
 * Smoother, more intuitive mouse movement
 
 First Round Improvements
