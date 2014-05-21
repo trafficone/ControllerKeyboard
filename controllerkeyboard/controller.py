@@ -1,5 +1,6 @@
 __author__ = 'trafficone'
 import math
+import autopy
 
 def enum(**enums):
     return type('Enum', (), enums)
@@ -52,20 +53,14 @@ class Controller:
     SENSITIVITY = 50
     DEADZONE = .2
     def __init__(self,joystick):
-        import autopy
-        from pymouse import PyMouse
-
-        self.key = autopy.key
-        self.m1 = autopy.mouse
-        self.loc = [self.m1.get_pos()[0],self.m1.get_pos()[1]]
-        self.m = PyMouse()
-        self.m.move(self.loc[0], self.loc[1])
 
         self.joystick = joystick
         self.joystick.init()
         self.debounce = 0
         self.hdebounce = 0
-        self.typewriter = Keyboard()
+
+        self.keyboard = Keyboard()
+        self.mouse = Mouse()
 
         self.myButtons = Xbox360Buttons
         self.myButtons[Buttons.LEFTANALOG] = [self.myButtons[Buttons.LEFTAXIS_X],self.myButtons[Buttons.LEFTAXIS_Y]]
@@ -97,8 +92,8 @@ class Controller:
             if self.joystick.get_button(i) == 1 and (
                         axis[0] ** 2 + axis[1] ** 2) ** .5 >= self.THRESH:
                 #ABXY - enter char
-                self.typewriter.type_letter(
-                    self.typewriter.get_letters(axis[0],
+                self.keyboard.type_letter(
+                    self.keyboard.get_letters(axis[0],
                                                 axis[1],
                                                 self.get_triggers())[3 - butts])
             else:
@@ -107,37 +102,37 @@ class Controller:
                 pass
         if self.joystick.get_button(self.myButtons[Buttons.L1]) == 1 and self.debounce == 0:
             self.debounce = 3
-            self.typewriter.type_letter(self.key.K_BACKSPACE)
+            self.keyboard.type_letter(autopy.key.K_BACKSPACE)
         if self.joystick.get_button(self.myButtons[Buttons.R1]) == 1 and self.debounce == 0: #RBump - space
             self.debounce = 3
-            self.typewriter.type_letter(' ')
+            self.keyboard.type_letter(' ')
         if self.joystick.get_button(self.myButtons[Buttons.START]) == 1: #Start - unmapped
             pass
         if self.joystick.get_button(self.myButtons[Buttons.SELECT]) == 1: #Select - unmapped
             pass
         if self.joystick.get_button(self.myButtons[Buttons.L3]) == 1: #Lstick - enter
-            self.typewriter.type_letter(self.key.K_RETURN)
+            self.keyboard.type_letter(autopy.key.K_RETURN)
         if self.joystick.get_button(self.myButtons[Buttons.R3]) == 1 and self.debounce == 0: #Rstick - click (LTrigger = right-click, RTrigger = Middle-click)
             self.debounce = 10
-            button = self.m1.LEFT_BUTTON
             triggers = self.get_triggers()
-            if triggers> self.DEADZONE:
-                button = self.m1.RIGHT_BUTTON
-            if triggers < -self.DEADZONE:
-                button = self.m1.CENTER_BUTTON
-            self.m1.click(button)
+            if triggers > self.DEADZONE:
+                self.mouse.click(autopy.mouse.RIGHT_BUTTON)
+            elif triggers < -self.DEADZONE:
+                self.mouse.click(autopy.mouse.CENTER_BUTTON)
+            else:
+                self.mouse.click(autopy.mouse.LEFT_BUTTON)
 
     def process_hat(self):
         if self.joystick.get_hat(0) != (0, 0) and self.hdebounce == 0:
             self.hdebounce = 5
             if self.joystick.get_hat(0)[1] == 1:
-                self.typewriter.type_letter(self.key.K_UP)
+                self.keyboard.type_letter(self.key.K_UP)
             if self.joystick.get_hat(0)[1] == -1:
-                self.typewriter.type_letter(self.key.K_DOWN)
+                self.keyboard.type_letter(self.key.K_DOWN)
             if self.joystick.get_hat(0)[0] == -1:
-                self.typewriter.type_letter(self.key.K_LEFT)
+                self.keyboard.type_letter(self.key.K_LEFT)
             if self.joystick.get_hat(0)[0] == 1:
-                self.typewriter.type_letter(self.key.K_RIGHT)
+                self.keyboard.type_letter(self.key.K_RIGHT)
 
     def get_analog_stick(self,stick_choice):
         if stick_choice not in [Buttons.LEFTANALOG,Buttons.RIGHTANALOG]:
@@ -152,21 +147,41 @@ class Controller:
     def update_mouse(self):
         axis = self.get_analog_stick(Buttons.RIGHTANALOG)
         oldloc = [self.loc[0], self.loc[1]]
-        if abs(axis[0]) > self.DEADZONE: # implementing DEAD ZONE
-            self.loc[0] += axis[0] ** 5 * self.SENSITIVITY
-            #FIXME: Support multiple displays
-            self.loc[0] = min(self.loc[0],3600)#self.m.screen_size()[0])
-            self.loc[0] = max(self.loc[0],0)
-        if abs(axis[1]) > self.DEADZONE: # implementing DEAD ZONE
-            self.loc[1] += axis[1] ** 5 * self.SENSITIVITY
-            self.loc[1] = min(self.loc[1],self.m.screen_size()[1])
-            self.loc[1] = max(self.loc[1],0)
+        if abs(axis[0]) > self.DEADZONE or abs(axis[1]) > self.DEADZONE:
+            self.mouse.move(map(lambda x:x ** 5 * self.SENSITIVITY,axis))
+
         if oldloc != self.loc:
-            self.m.move(int(self.loc[0]), int(self.loc[1]))
-class Keyboard:
+
+
+class Mouse:
     def __init__(self):
         import autopy
+        from pymouse import PyMouse
 
+        self.m1 = autopy.mouse
+        self.loc = [self.m1.get_pos()[0],self.m1.get_pos()[1]]
+        self.m = PyMouse()
+        self.m.move(self.loc[0], self.loc[1])
+
+    def move(self,direction):
+        #Move mouse
+        self.loc[0] += direction[0]
+        self.loc[1] += direction[1] ** 5 * self.SENSITIVITY
+        #FIXME: Support multiple displays
+        #Check horizontal bounds
+        self.loc[0] = min(self.loc[0],3600)#self.m.screen_size()[0])
+        self.loc[0] = max(self.loc[0],0)
+        #Check vertical bounds
+        self.loc[1] = min(self.loc[1],self.m.screen_size()[1])
+        self.loc[1] = max(self.loc[1],0)
+        self.m.move(int(self.loc[0]), int(self.loc[1]))
+
+    def click(self,button):
+        self.m1.click(button)
+
+
+class Keyboard:
+    def __init__(self):
         self.key = autopy.key
 
         self.lchars = map(chr, range(ord('a'), ord('z') + 1))

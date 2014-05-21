@@ -57,7 +57,7 @@ while done == False:
             textPrint.draw_chars(screen,
                              (200+axis[0] * 100,
                               200 + axis[1] * 100),
-                              controller.typewriter.get_letters(axis[0], axis[1],
+                              controller.keyboard.get_letters(axis[0], axis[1],
                                                     controller.get_triggers()))
         axis = controller.get_analog_stick(Buttons.RIGHTANALOG)
         pygame.draw.line(screen, pygame.Color(255, 0, 0), (200, 200),
