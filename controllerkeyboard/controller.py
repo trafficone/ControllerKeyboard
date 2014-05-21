@@ -126,13 +126,13 @@ class Controller:
         if self.joystick.get_hat(0) != (0, 0) and self.hdebounce == 0:
             self.hdebounce = 5
             if self.joystick.get_hat(0)[1] == 1:
-                self.keyboard.type_letter(self.key.K_UP)
+                self.keyboard.type_letter(autopy.key.K_UP)
             if self.joystick.get_hat(0)[1] == -1:
-                self.keyboard.type_letter(self.key.K_DOWN)
+                self.keyboard.type_letter(autopy.key.K_DOWN)
             if self.joystick.get_hat(0)[0] == -1:
-                self.keyboard.type_letter(self.key.K_LEFT)
+                self.keyboard.type_letter(autopy.key.K_LEFT)
             if self.joystick.get_hat(0)[0] == 1:
-                self.keyboard.type_letter(self.key.K_RIGHT)
+                self.keyboard.type_letter(autopy.key.K_RIGHT)
 
     def get_analog_stick(self,stick_choice):
         if stick_choice not in [Buttons.LEFTANALOG,Buttons.RIGHTANALOG]:
@@ -146,11 +146,8 @@ class Controller:
 
     def update_mouse(self):
         axis = self.get_analog_stick(Buttons.RIGHTANALOG)
-        oldloc = [self.loc[0], self.loc[1]]
         if abs(axis[0]) > self.DEADZONE or abs(axis[1]) > self.DEADZONE:
             self.mouse.move(map(lambda x:x ** 5 * self.SENSITIVITY,axis))
-
-        if oldloc != self.loc:
 
 
 class Mouse:
@@ -166,7 +163,7 @@ class Mouse:
     def move(self,direction):
         #Move mouse
         self.loc[0] += direction[0]
-        self.loc[1] += direction[1] ** 5 * self.SENSITIVITY
+        self.loc[1] += direction[1]
         #FIXME: Support multiple displays
         #Check horizontal bounds
         self.loc[0] = min(self.loc[0],3600)#self.m.screen_size()[0])
