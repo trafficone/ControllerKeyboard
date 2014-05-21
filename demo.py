@@ -47,9 +47,6 @@ while done == False:
         if event.type == pygame.JOYBUTTONDOWN:
             controller.process_button()
 
-    if controller != None:
-
-
     #DRAWING STEP
     screen.fill(WHITE)
     textPrint.reset()

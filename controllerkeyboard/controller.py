@@ -155,7 +155,7 @@ class Controller:
         if abs(axis[0]) > self.DEADZONE: # implementing DEAD ZONE
             self.loc[0] += axis[0] ** 5 * self.SENSITIVITY
             #FIXME: Support multiple displays
-            #self.loc[0] = min(self.loc[0],self.m.screen_size()[0])
+            self.loc[0] = min(self.loc[0],3600)#self.m.screen_size()[0])
             self.loc[0] = max(self.loc[0],0)
         if abs(axis[1]) > self.DEADZONE: # implementing DEAD ZONE
             self.loc[1] += axis[1] ** 5 * self.SENSITIVITY
@@ -209,5 +209,12 @@ class Keyboard:
         else:
             return self.schars[4 * segment:4 * segment + 4]
 
-    def type_letter(self,keyval):
-        self.key.tap(keyval)
+    def type_letter(self,keyval,shift=False):
+        mods = 0
+        if type(keyval) == str:
+            if keyval in '~!@#$%^&*(){}"<>PYFGCRL?+|AOEUIDHTNS_:QJKXBMWVZ' and len(keyval) == 1:
+                mods |= self.key.MOD_SHIFT
+            if keyval[0] == '^' and len(keyval) == 2:
+                mods |= self.key.MOD_CONTROL
+                keyval = keyval[1]
+        self.key.tap(keyval, mods)
