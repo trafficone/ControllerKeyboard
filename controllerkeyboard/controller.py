@@ -53,11 +53,8 @@ class Controller:
     SENSITIVITY = 50
     DEADZONE = .2
     def __init__(self,joystick):
-
         self.joystick = joystick
         self.joystick.init()
-        self.debounce = 0
-        self.hdebounce = 0
 
         self.keyboard = Keyboard()
         self.mouse = Mouse()
@@ -67,7 +64,6 @@ class Controller:
         self.myButtons[Buttons.RIGHTANALOG] = [self.myButtons[Buttons.RIGHTAXIS_X],self.myButtons[Buttons.RIGHTAXIS_Y]]
 
         self.validate_buttons(self.myButtons)
-
 
     def validate_buttons(self,buttonDict):
         for i in range(18):
@@ -80,10 +76,6 @@ class Controller:
         self.joystick.init()
         self.update_mouse()
         self.process_hat()
-        if self.debounce > 0:
-            self.debounce -= 1
-        if self.hdebounce > 0:
-            self.hdebounce -= 1
 
     def process_button(self):
         for butts in range(4):
@@ -100,11 +92,9 @@ class Controller:
                 #I keep finding myself doing this
                 #self.m1.click()
                 pass
-        if self.joystick.get_button(self.myButtons[Buttons.L1]) == 1 and self.debounce == 0:
-            self.debounce = 3
+        if self.joystick.get_button(self.myButtons[Buttons.L1]) == 1:
             self.keyboard.type_letter(autopy.key.K_BACKSPACE)
-        if self.joystick.get_button(self.myButtons[Buttons.R1]) == 1 and self.debounce == 0: #RBump - space
-            self.debounce = 3
+        if self.joystick.get_button(self.myButtons[Buttons.R1]) == 1: #RBump - space
             self.keyboard.type_letter(' ')
         if self.joystick.get_button(self.myButtons[Buttons.START]) == 1: #Start - unmapped
             pass
@@ -112,8 +102,7 @@ class Controller:
             pass
         if self.joystick.get_button(self.myButtons[Buttons.L3]) == 1: #Lstick - enter
             self.keyboard.type_letter(autopy.key.K_RETURN)
-        if self.joystick.get_button(self.myButtons[Buttons.R3]) == 1 and self.debounce == 0: #Rstick - click (LTrigger = right-click, RTrigger = Middle-click)
-            self.debounce = 10
+        if self.joystick.get_button(self.myButtons[Buttons.R3]) == 1: #Rstick - click (LTrigger = right-click, RTrigger = Middle-click)
             triggers = self.get_triggers()
             if triggers > self.DEADZONE:
                 self.mouse.click(autopy.mouse.RIGHT_BUTTON)
@@ -123,8 +112,7 @@ class Controller:
                 self.mouse.click(autopy.mouse.LEFT_BUTTON)
 
     def process_hat(self):
-        if self.joystick.get_hat(0) != (0, 0) and self.hdebounce == 0:
-            self.hdebounce = 5
+        if self.joystick.get_hat(0) != (0, 0):
             if self.joystick.get_hat(0)[1] == 1:
                 self.keyboard.type_letter(autopy.key.K_UP)
             if self.joystick.get_hat(0)[1] == -1:
